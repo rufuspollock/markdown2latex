@@ -25,7 +25,7 @@ setup(
     download_url = 'http://pypi.python.org/pypi/markdown2latex/',
     zip_safe=False,
     classifiers = [
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

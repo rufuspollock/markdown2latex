@@ -2,6 +2,8 @@ python-markdown extension to output LaTeX (rather than html) - i.e. to
 provide support for converting markdown to LaTeX.
 
 Authored by Rufus Pollock: <http://rufuspollock.org/>
+Reworked by Julian Wulfheide (ju.wulfheide@gmail.com) and
+Pedro Gaudêncio (pmgaudencio@gmail.com)
 
 Usage:
 ======
@@ -52,4 +54,11 @@ Version 1.3: (July 2008)
 Version 1.3.1: (August 2009)
   * Tiny bugfix to remove duplicate keyword argument and set zip_safe=False
   * Add [width=\\textwidth] by default for included images
+
+Version 2.0: (June 2011)
+  * PEP8 cleanup
+  * Major rework since this was broken by new Python-Markdown releases
+
+Version 2.1: (August 2013)
+  * Add handler for non locally referenced images
 
