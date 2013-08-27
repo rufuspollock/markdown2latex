@@ -3,7 +3,7 @@
 
 Authored by Rufus Pollock: <http://www.rufuspollock.org/>
 Reworked by Julian Wulfheide (ju.wulfheide@gmail.com) and
-Pedro Gaudêncio (pmgaudencio@gmail.com)
+Pedro Gaudencio (pmgaudencio@gmail.com)
 
 Usage:
 ======
@@ -60,7 +60,7 @@ Version 2.0: (June 2011)
   * Major rework since this was broken by new Python-Markdown releases
 
 Version 2.1: (August 2013)
-  * Add handler for non locally referenced images
+  * Add handler for non locally referenced images and hyperlinks
 """
 
 __version__ = '2.1'
@@ -72,6 +72,11 @@ import sys
 import markdown
 import xml.dom.minidom
 from urlparse import urlparse
+import httplib
+import os
+import tempfile
+import urllib
+import re
 
 
 start_single_quote_re = re.compile("(^|\s|\")'")
@@ -137,6 +142,7 @@ class LaTeXExtension(markdown.Extension):
         math_pp = MathTextPostProcessor()
         table_pp = TableTextPostProcessor()
         image_pp = ImageTextPostProcessor()
+        link_pp = LinkTextPostProcessor()
         unescape_html_pp = UnescapeHtmlTextPostProcessor()
 
         md.treeprocessors['latex'] = latex_tp
@@ -144,6 +150,7 @@ class LaTeXExtension(markdown.Extension):
         md.postprocessors['math'] = math_pp
         md.postprocessors['image'] = image_pp
         md.postprocessors['table'] = table_pp
+        md.postprocessors['link'] = link_pp
 
     def reset(self):
         pass
@@ -244,6 +251,9 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         elif ournode.tag == 'img':
             buffer += '<img src=\"%s\" alt=\"%s\" />' % (ournode.get('src'),
                       ournode.get('alt'))
+        elif ournode.tag == 'a':
+            buffer += '<a href=\"%s\">%s</a>' % (ournode.get('href'),
+                      subcontent)
         else:
             buffer = subcontent
 
@@ -461,23 +471,18 @@ class Img2Latex(object):
         dom = xml.dom.minidom.parseString(instr)
         img = dom.documentElement
         src = img.getAttribute('src')
-        """
-        check the image source
-        """
+
         if urlparse(src).scheme != '':
             src_urlparse = urlparse(src)
-            import httplib
             conn = httplib.HTTPConnection(src_urlparse.netloc)
             conn.request('HEAD', src_urlparse.path)
             response = conn.getresponse()
             conn.close()
             if response.status == 200:
-                import os
-                import tempfile
-                import urllib
-                dest = os.path.join(tempfile.mkdtemp(), src.split('/')[-1])
-                urllib.urlretrieve(src, dest)
-                src = dest
+                filename = os.path.join(tempfile.mkdtemp(), src.split('/')[-1])
+                urllib.urlretrieve(src, filename)
+                src = filename
+
         alt = img.getAttribute('alt')
         out = \
             """
@@ -487,6 +492,40 @@ class Img2Latex(object):
             \\caption{%s}
             \\end{figure}
             """ % (src, alt)
+        return out
+
+
+# ========================== LINKS =================================
+
+class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
+
+    def run(self, instr):
+        """ Process all hyperlinks """
+        converter = Link2Latex()
+        new_blocks = []
+        for block in instr.split("\n\n"):
+            stripped = block.strip()
+            match = re.search(r'<a[^>]*>([^<]+)</a>', stripped)
+            # <table catches modified verions (e.g. <table class="..">
+            if match:
+                latex_link = re.sub(r'<a[^>]*>([^<]+)</a>', converter.convert(match.group(0)).strip(), stripped)
+                new_blocks.append(latex_link)
+            else:
+                new_blocks.append(block)
+        return '\n\n'.join(new_blocks)
+
+
+class Link2Latex(object):
+    def convert(self, instr):
+        dom = xml.dom.minidom.parseString (instr)
+        link = dom.documentElement
+        href = link.getAttribute('href')
+
+        desc = re.search(r'>([^<]+)', instr)
+        out = \
+            """
+            \\href{%s}{%s}
+            """ % (href, desc.group(0)[1:])
         return out
 
 

@@ -2,6 +2,7 @@ python-markdown extension to output LaTeX (rather than html) - i.e. to
 provide support for converting markdown to LaTeX.
 
 Authored by Rufus Pollock: <http://rufuspollock.org/>
+
 Reworked by Julian Wulfheide (ju.wulfheide@gmail.com) and
 Pedro Gaudêncio (pmgaudencio@gmail.com)
 
@@ -60,5 +61,5 @@ Version 2.0: (June 2011)
   * Major rework since this was broken by new Python-Markdown releases
 
 Version 2.1: (August 2013)
-  * Add handler for non locally referenced images
+  * Add handler for non locally referenced images and hyperlinks
 
