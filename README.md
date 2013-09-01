@@ -61,5 +61,5 @@ Version 2.0: (June 2011)
   * Major rework since this was broken by new Python-Markdown releases
 
 Version 2.1: (August 2013)
-  * Add handler for non locally referenced images and hyperlinks
-
+  * Add handler for non locally referenced images, hyperlinks and horizontal rules
+  * Update math delimiters

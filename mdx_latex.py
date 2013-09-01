@@ -60,7 +60,8 @@ Version 2.0: (June 2011)
   * Major rework since this was broken by new Python-Markdown releases
 
 Version 2.1: (August 2013)
-  * Add handler for non locally referenced images and hyperlinks
+  * Add handler for non locally referenced images, hyperlinks and horizontal rules
+  * Update math delimiters
 """
 
 __version__ = '2.1'
@@ -76,7 +77,6 @@ import httplib
 import os
 import tempfile
 import urllib
-import re
 
 
 start_single_quote_re = re.compile("(^|\s|\")'")
@@ -191,6 +191,8 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
             buffer += '\n\n\\subsection{%s}\n' % subcontent
         elif ournode.tag == 'h4':
             buffer += '\n\\subsubsection{%s}\n' % subcontent
+        elif ournode.tag == 'hr':
+            buffer += '\\noindent\makebox[\linewidth]{\\rule{\paperwidth}{0.4pt}}'
         elif ournode.tag == 'ul':
             # no need for leading \n as one will be provided by li
             buffer += """
@@ -277,30 +279,24 @@ class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
         """Convert all math sections in {text} whether latex, asciimathml or
         latexmathml formatted to latex.
 
-        This assumes you are using $$ as your mathematics delimiter (*not* the
-        standard asciimathml or latexmathml delimiter).
+        This assumes you are using $ for inline math and $$ for blocks as your
+        mathematics delimiter (*not* the standard asciimathml or latexmathml
+        delimiter).
         """
         def repl_1(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
-            tmp = text.strip()
-            if tmp.startswith('\\[') or tmp.startswith('\\begin'):
-                return text
-            else:
-                return '\\[%s\\]\n' % text
+            return '\\[%s\\]' % text
 
         def repl_2(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
-            return '$%s$' % text
+            return '\\(%s\\)' % text
 
-        # $$ ..... $$
-        pat = re.compile('^\$\$([^\$]*)\$\$\s*$', re.MULTILINE)
+        # This $$x=3$$ is block math
+        pat = re.compile('\$\$([^\$]*)\$\$')
         out = pat.sub(repl_1, instr)
-        # $100 million
-        pat2 = re.compile('([^\$])\$([^\$])')
-        out = pat2.sub('\g<1>\\$\g<2>', out)
-        # Jones, $$x=3$$, is ...
-        pat3 = re.compile('\$\$([^\$]*)\$\$')
-        out = pat3.sub(repl_2, out)
+        # This $x=3$ is inline math
+        pat2 = re.compile('\$([^\$]*)\$')
+        out = pat2.sub(repl_2, out)
         # some extras due to asciimathml
         out = out.replace('\\lt', '<')
         out = out.replace(' * ', ' \\cdot ')
@@ -486,7 +482,7 @@ class Img2Latex(object):
         alt = img.getAttribute('alt')
         out = \
             """
-            \\begin{figure}[h]
+            \\begin{figure}[ht]
             \\centering
             \\includegraphics[width=\\textwidth]{%s}
             \\caption{%s}
@@ -500,7 +496,7 @@ class Img2Latex(object):
 class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
 
     def run(self, instr):
-        """ Process all hyperlinks """
+        # Process all hyperlinks
         converter = Link2Latex()
         new_blocks = []
         for block in instr.split("\n\n"):
@@ -508,7 +504,9 @@ class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
             match = re.search(r'<a[^>]*>([^<]+)</a>', stripped)
             # <table catches modified verions (e.g. <table class="..">
             if match:
-                latex_link = re.sub(r'<a[^>]*>([^<]+)</a>', converter.convert(match.group(0)).strip(), stripped)
+                latex_link = re.sub(r'<a[^>]*>([^<]+)</a>',
+                                    converter.convert(match.group(0)).strip(),
+                                    stripped)
                 new_blocks.append(latex_link)
             else:
                 new_blocks.append(block)
@@ -517,7 +515,7 @@ class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
 
 class Link2Latex(object):
     def convert(self, instr):
-        dom = xml.dom.minidom.parseString (instr)
+        dom = xml.dom.minidom.parseString(instr)
         link = dom.documentElement
         href = link.getAttribute('href')
 
