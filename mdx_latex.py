@@ -192,7 +192,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         elif ournode.tag == 'h4':
             buffer += '\n\\subsubsection{%s}\n' % subcontent
         elif ournode.tag == 'hr':
-            buffer += '\\noindent\makebox[\linewidth]{\\rule{\paperwidth}{0.4pt}}'
+            buffer += '\\noindent\makebox[\linewidth]{\\rule{\linewidth}{0.4pt}}'
         elif ournode.tag == 'ul':
             # no need for leading \n as one will be provided by li
             buffer += """
@@ -480,11 +480,12 @@ class Img2Latex(object):
                 src = filename
 
         alt = img.getAttribute('alt')
+	# Using graphicx and ajustbox package for *max width*
         out = \
             """
-            \\begin{figure}[ht]
+            \\begin{figure}[H]
             \\centering
-            \\includegraphics[width=\\textwidth]{%s}
+            \\includegraphics[max width=\\linewidth]{%s}
             \\caption{%s}
             \\end{figure}
             """ % (src, alt)
