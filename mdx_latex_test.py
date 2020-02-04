@@ -157,19 +157,19 @@ Now some preformatted text:
         outlines = out.split('\n')
         explines = self.expected.split('\n')
         # TODO: this misses stuff if out > exp
-        print '******** EXPECTED *********'
-        print self.expected
-        print '******** ACTUAL *********'
-        print out
-        print '******** ANALYSIS *********'
+        print('******** EXPECTED *********')
+        print(self.expected)
+        print('******** ACTUAL *********')
+        print(out)
+        print('******** ANALYSIS *********')
         for ii in range(len(explines)):
             if outlines[ii] != explines[ii]:
-                print ii
-                print 'out:', '"%s"' % outlines[ii]
-                print 'exp:', '"%s"' % explines[ii]
+                print(ii)
+                print('out:', '"%s"' % outlines[ii])
+                print('exp:', '"%s"' % explines[ii])
         if len(explines) < len(outlines):
-            print 'Out longer than expected:'
-            print outlines[len(explines):]
+            print('Out longer than expected:')
+            print(outlines[len(explines):])
         # for ii in range(len(out)):
         #    if out[ii] != self.expected[ii]:
         #        print out[ii:ii+10]
@@ -190,7 +190,7 @@ Now for ```Something a little' more complicated''. ``And again.''
 
     def test_1(self):
         out = mdx_latex.escape_latex_entities(self.in1)
-        print out
+        print(out)
         assert out == self.exp1
         # for ii in range(len(out)):
         #    print ii
@@ -215,7 +215,7 @@ class TestTable2Latex:
     </tbody>
 </table>'''
 
-    exp1 = u'''
+    exp1 = '''
 \\begin{table}
 \\begin{tabular}{|c|c|c|c|}
 \\hline
@@ -234,9 +234,9 @@ class TestTable2Latex:
     def test_1(self):
         converter = mdx_latex.Table2Latex()
         out = converter.convert(self.intable1)
-        ss = unicode(self.exp1)
-        print out
-        print ss
+        ss = str(self.exp1)
+        print(out)
+        print(ss)
         assert out == ss
 
 class TestMathConvert:
@@ -274,7 +274,7 @@ W & = & y + z \\\\
     def test_1(self):
         converter = mdx_latex.MathTextPostProcessor()
         out = converter.run(self.intext)
-        print out
+        print(out)
         assert out == self.outtext
 
 class TestImgConvert:
@@ -294,5 +294,5 @@ class TestImgConvert:
     def test_1(self):
         converter = mdx_latex.Img2Latex()
         out = converter.convert(self.intext)
-        print out
+        print(out)
         assert out == self.exp1
