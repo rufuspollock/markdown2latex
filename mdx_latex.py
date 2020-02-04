@@ -72,11 +72,11 @@ import re
 import sys
 import markdown
 import xml.dom.minidom
-from urlparse import urlparse
-import httplib
+from urllib.parse import urlparse
+import http.client
 import os
 import tempfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 
 start_single_quote_re = re.compile("(^|\s|\")'")
@@ -130,10 +130,10 @@ class LaTeXExtension(markdown.Extension):
 
         # remove escape pattern -- \\(.*) -- as this messes up any embedded
         # math and we don't need to escape stuff any more for html
-        for key, pat in self.md.inlinePatterns.iteritems():
-            if pat.pattern == markdown.inlinepatterns.ESCAPE_RE:
-                self.md.inlinePatterns.pop(key)
-                break
+        # for key, pat in self.md.inlinePatterns.items():
+        #     if pat.pattern == markdown.inlinepatterns.ESCAPE_RE:
+        #         self.md.inlinePatterns.pop(key)
+        #         break
 
         #footnote_extension = FootnoteExtension()
         #footnote_extension.extendMarkdown(md, md_globals)
@@ -470,13 +470,13 @@ class Img2Latex(object):
 
         if urlparse(src).scheme != '':
             src_urlparse = urlparse(src)
-            conn = httplib.HTTPConnection(src_urlparse.netloc)
+            conn = http.client.HTTPConnection(src_urlparse.netloc)
             conn.request('HEAD', src_urlparse.path)
             response = conn.getresponse()
             conn.close()
             if response.status == 200:
                 filename = os.path.join(tempfile.mkdtemp(), src.split('/')[-1])
-                urllib.urlretrieve(src, filename)
+                urllib.request.urlretrieve(src, filename)
                 src = filename
 
         alt = img.getAttribute('alt')
@@ -594,7 +594,7 @@ class FootnotePreprocessor:
     def recordFootnoteUse(self, match):
         id = match.group(1)
         id = id.strip()
-        nextNum = len(self.footnotes.used_footnotes.keys()) + 1
+        nextNum = len(list(self.footnotes.used_footnotes.keys())) + 1
         self.footnotes.used_footnotes[id] = nextNum
 
     def _handleFootnoteDefinitions(self, lines):
@@ -694,7 +694,7 @@ def main():
         tmpl_fo = file(options.template)
         out = template(tmpl_fo, out)
 
-    print out
+    print(out)
 
 if __name__ == '__main__':
     main()
