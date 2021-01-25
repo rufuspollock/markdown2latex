@@ -523,7 +523,7 @@ class Link2Latex(object):
         desc = re.search(r'>([^<]+)', instr)
         out = \
             """
-            \\href{%s}{%s}
+            \\\href{%s}{%s}
             """ % (href, desc.group(0)[1:])
         return out
 
