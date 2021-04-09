@@ -11,7 +11,7 @@ setup(
     markdown2latex.py=mdx_latex:main
     ''',
     install_requires=[
-        'Markdown>=1.5',
+        'Markdown==1.7',
         ],
 
     # metadata for upload to PyPI
