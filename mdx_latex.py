@@ -83,6 +83,27 @@ start_single_quote_re = re.compile("(^|\s|\")'")
 start_double_quote_re = re.compile("(^|\s|'|`)\"")
 end_double_quote_re = re.compile("\"(,|\.|\s|$)")
 
+def inline_html_latex(text):
+    out = text
+    # most of them to support smarty extensions
+    if re.search(r'&ldquo;.*?&rdquo;', text , flags=re.DOTALL):
+        out = out.replace('&ldquo;', '\enquote{').replace('&rdquo;', '}')
+    # replace certain html element with they LaTeX eqivarent
+    if re.search(r'&lsquo;.*?&rsquo;', text , flags=re.DOTALL):
+        out = out.replace('&lsquo;', '\enquote{').replace('&rsquo;', '}')
+    if re.search(r'&ldquo;.*?&ldquo;', text , flags=re.DOTALL):
+        # sometimes is processing like this
+        out = out.replace('&ldquo;', '\enquote{', 1).replace('&ldquo;', '}', 1)
+    if re.search(r'&laquo;.*?&raquo;', text , flags=re.DOTALL):
+        out = out.replace('&laquo;', '\enquote{').replace('&raquo;', '}')
+    out = out.replace("...", "\dots")
+    out = out.replace("&hellip;", "\dots")
+    out = out.replace("&ndash;", "--")
+    out = out.replace("&mdash;", "---")    
+    # replace '\|' as we should already processed the tables and do not need in LaTeX
+    out = out.replace("\|", '|')
+    return out 
+        
 
 def unescape_html_entities(text):
     out = text.replace('&amp;', '&')
@@ -172,7 +193,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         subcontent = ""
 
         if ournode.text:
-            subcontent += escape_latex_entities(ournode.text)
+            subcontent += escape_latex_entities(ournode.text)            
 
         if ournode.getchildren():
             for child in ournode.getchildren():
@@ -193,16 +214,21 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
             buffer += '\n\\subsubsection{%s}\n' % subcontent
         elif ournode.tag == 'hr':
             buffer += '\\noindent\makebox[\linewidth]{\\rule{\linewidth}{0.4pt}}'
-        elif ournode.tag == 'ul':
+        elif ournode.tag == 'ul':            
             # no need for leading \n as one will be provided by li
             buffer += """
 \\begin{itemize}%s
 \\end{itemize}
 """ % subcontent
         elif ournode.tag == 'ol':
+            buffer += """
+\\begin{enumerate}"""            
+            if 'start' in ournode.attrib.keys():
+                start = int(ournode.attrib['start'])-1
+                buffer += "\setcounter{enumi}{"+str(start)+"}"
             # no need for leading \n as one will be provided by li
             buffer += """
-\\begin{enumerate}%s
+%s
 \\end{enumerate}
 """ % subcontent
         elif ournode.tag == 'li':
@@ -268,7 +294,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
 class UnescapeHtmlTextPostProcessor(markdown.postprocessors.Postprocessor):
 
     def run(self, text):
-        return unescape_html_entities(text)
+        return unescape_html_entities(inline_html_latex(text))
 
 # ========================= MATHS =================================
 
@@ -563,7 +589,8 @@ class FootnoteExtension (markdown.Extension):
         #index = md.inlinePatterns.index(md_globals['IMAGE_REFERENCE_PATTERN'])
         #md.inlinePatterns.insert(index, FootnotePattern(FOOTNOTE_RE, self))
         md.inlinePatterns.add('footnotes', FootnotePattern(FOOTNOTE_RE, self),
-                              '_begin')
+                              '_begin')        
+        
 
     def reset(self):
         self.used_footnotes = {}
