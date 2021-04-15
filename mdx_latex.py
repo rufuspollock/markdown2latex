@@ -193,7 +193,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         subcontent = ""
 
         if ournode.text:
-            subcontent += escape_latex_entities(ournode.text)            
+            subcontent += escape_latex_entities(ournode.text)
 
         if ournode.getchildren():
             for child in ournode.getchildren():
@@ -214,7 +214,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
             buffer += '\n\\subsubsection{%s}\n' % subcontent
         elif ournode.tag == 'hr':
             buffer += '\\noindent\makebox[\linewidth]{\\rule{\linewidth}{0.4pt}}'
-        elif ournode.tag == 'ul':            
+        elif ournode.tag == 'ul':
             # no need for leading \n as one will be provided by li
             buffer += """
 \\begin{itemize}%s
