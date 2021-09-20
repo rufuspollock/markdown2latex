@@ -195,8 +195,8 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         if ournode.text:
             subcontent += escape_latex_entities(ournode.text)
 
-        if ournode.getchildren():
-            for child in ournode.getchildren():
+        if list(ournode):
+            for child in list(ournode):
                 subcontent += self.tolatex(child)
 
         if ournode.tag == 'h1':
