@@ -528,12 +528,15 @@ class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
         new_blocks = []
         for block in instr.split("\n\n"):
             stripped = block.strip()
-            match = re.search(r'<a[^>]*>([^<]+)</a>', stripped)
+            match = re.findall(r'<a[^>]*>[^<]+</a>', stripped)
             # <table catches modified verions (e.g. <table class="..">
             if match:
-                latex_link = re.sub(r'<a[^>]*>([^<]+)</a>',
-                                    converter.convert(match.group(0)).strip(),
-                                    stripped)
+                latex_link = stripped
+                # replace multiple <a> occurrences individually
+                for occurrence in match:
+                    latex_link = re.sub(r'<a[^>]*>([^<]+)</a>',
+                        converter.convert(occurrence).strip(),
+                        latex_link, count=1)
                 new_blocks.append(latex_link)
             else:
                 new_blocks.append(block)
