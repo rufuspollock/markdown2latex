@@ -280,7 +280,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
             buffer += '<img src=\"%s\" alt=\"%s\" />' % (ournode.get('src'),
                       ournode.get('alt'))
         elif ournode.tag == 'a':
-            buffer += '<a href=\"%s\">%s</a>' % (ournode.get('href'),
+            buffer += '<a href=\"%s\">%s</a>' % (escape_latex_entities(ournode.get('href')),
                       subcontent)
         else:
             buffer = subcontent
