@@ -550,10 +550,13 @@ class Link2Latex(object):
         href = link.getAttribute('href')
 
         desc = re.search(r'>([^<]+)', instr)
-        out = \
-            """
-            \\\href{%s}{%s}
-            """ % (href, desc.group(0)[1:])
+        if href == desc.group(1):
+            out = r"\\url{%s}" % (href)
+        else:
+            out = \
+                """
+                \\\href{%s}{%s}
+                """ % (href, desc.group(1))
         return out
 
 
