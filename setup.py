@@ -1,6 +1,6 @@
 from setuptools import setup
 
-from mdx_latex import __version__, __doc__
+from doc import __version__, __doc__
 
 setup(
     name = 'markdown2latex',
