@@ -479,6 +479,7 @@ class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
 
 class Link2Latex(object):
     def convert(self, instr):
+        instr = ''.join(c for c in instr if c.isprintable())
         dom = xml.dom.minidom.parseString(instr)
         link = dom.documentElement
         href = link.getAttribute('href')
@@ -487,10 +488,7 @@ class Link2Latex(object):
         if href == desc.group(1):
             out = r"\\url{%s}" % (href)
         else:
-            out = \
-                """
-                \\\href{%s}{%s}
-                """ % (href, desc.group(1))
+            out = r"\\footnote{\\url{%s}}" % (href)
         return out
 
 
