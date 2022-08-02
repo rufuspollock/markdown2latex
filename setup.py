@@ -11,8 +11,8 @@ setup(
     markdown2latex.py=mdx_latex:main
     ''',
     install_requires=[
-        'Markdown==1.7',
-        ],
+        'Markdown>=3.4.1',
+    ],
 
     # metadata for upload to PyPI
     author = 'Rufus Pollock (Open Knowledge Foundation)',
