@@ -146,12 +146,12 @@ Now some preformatted text:
 
   \\$ sudo python ...
 \\end{verbatim}'''
-    md = markdown.Markdown(None)
+    md = markdown.Markdown()
 
     def test_1(self):
         ltx = mdx_latex.makeExtension()
         # or just mdx_latex.LaTeXExtension()
-        ltx.extendMarkdown(self.md, markdown.__dict__)
+        ltx.extendMarkdown(self.md)
         # self.footnoteExtension.extendMarkdown(self.mdx_latexer)
         out = self.md.convert(self.mkdn_input)
         outlines = out.split('\n')

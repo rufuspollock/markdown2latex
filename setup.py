@@ -6,10 +6,10 @@ setup(
     name = 'markdown2latex',
     version = __version__,
     py_modules=['mdx_latex'],
-    entry_points='''
-    [console_scripts]
-    markdown2latex.py=mdx_latex:main
-    ''',
+    entry_points={
+        'markdown.extensions': ['latex = mdx_latex:LaTeXExtension'],
+        'console_scripts': ['markdown2latex.py = mdx_latex:main']
+    },
     install_requires=[
         'Markdown>=3.4.1',
     ],

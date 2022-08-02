@@ -5,6 +5,7 @@ import re
 import sys
 import markdown
 import xml.dom.minidom
+import xml.etree.ElementTree as etree
 from urllib.parse import urlparse
 import http.client
 import os
@@ -79,7 +80,7 @@ class LaTeXExtension(markdown.Extension):
     def __init__(self, configs=None):
         self.reset()
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         self.md = md
 
         # remove escape pattern -- \\(.*) -- as this messes up any embedded
@@ -99,12 +100,12 @@ class LaTeXExtension(markdown.Extension):
         link_pp = LinkTextPostProcessor()
         unescape_html_pp = UnescapeHtmlTextPostProcessor()
 
-        md.treeprocessors['latex'] = latex_tp
-        md.postprocessors['unescape_html'] = unescape_html_pp
-        md.postprocessors['math'] = math_pp
-        md.postprocessors['image'] = image_pp
-        md.postprocessors['table'] = table_pp
-        md.postprocessors['link'] = link_pp
+        md.treeprocessors.register(latex_tp, 'latex', 20)
+        md.postprocessors.register(unescape_html_pp, 'unescape_html', 20)
+        md.postprocessors.register(math_pp, 'math', 20)
+        md.postprocessors.register(image_pp, 'image', 20)
+        md.postprocessors.register(table_pp, 'table', 20)
+        md.postprocessors.register(link_pp, 'link', 20)
 
     def reset(self):
         pass
@@ -117,7 +118,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         latex_text = self.tolatex(doc)
 
         doc.clear()
-        latex_node = markdown.util.etree.Element('root')
+        latex_node = etree.Element('root')
         latex_node.text = latex_text
         doc.append(latex_node)
 
@@ -510,7 +511,7 @@ class FootnoteExtension (markdown.Extension):
     def __init__(self, configs=None):
         self.reset()
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         self.md = md
 
         # Stateless extensions do not need to be registered
@@ -649,16 +650,16 @@ def main():
         parser.print_help()
         sys.exit(1)
     inpath = args[0]
-    infile = file(inpath)
 
-    md = markdown.Markdown()
-    mkdn2latex = LaTeXExtension()
-    mkdn2latex.extendMarkdown(md, markdown.__dict__)
-    out = md.convert(infile.read())
+    with open(inpath) as infile:
+        md = markdown.Markdown()
+        mkdn2latex = LaTeXExtension()
+        mkdn2latex.extendMarkdown(md)
+        out = md.convert(infile.read())
 
     if options.template:
-        tmpl_fo = file(options.template)
-        out = template(tmpl_fo, out)
+        with open(options.template) as tmpl_fo:
+            out = template(tmpl_fo, out)
 
     print(out)
 
