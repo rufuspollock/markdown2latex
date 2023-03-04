@@ -1,18 +1,18 @@
 from setuptools import setup
 
-from mdx_latex import __version__, __doc__
+from doc import __version__, __doc__
 
 setup(
     name = 'markdown2latex',
     version = __version__,
     py_modules=['mdx_latex'],
-    entry_points='''
-    [console_scripts]
-    markdown2latex.py=mdx_latex:main
-    ''',
+    entry_points={
+        'markdown.extensions': ['latex = mdx_latex:LaTeXExtension'],
+        'console_scripts': ['markdown2latex.py = mdx_latex:main']
+    },
     install_requires=[
-        'Markdown==1.7',
-        ],
+        'Markdown>=3.4.1',
+    ],
 
     # metadata for upload to PyPI
     author = 'Rufus Pollock (Open Knowledge Foundation)',
